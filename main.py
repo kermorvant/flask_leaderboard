@@ -189,7 +189,9 @@ def allowed_file(filename):
 
 @app.route('/test/')
 def test():
-    return render_template('test.html')
+    leaderboard = get_leaderboard(greater_better = greater_better, limit = limit_lb, submission_type='public')
+    return render_template('test.html', leaderboard = leaderboard,
+)
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
@@ -199,11 +201,9 @@ def login():
 
     # check if the user actually exists
     if user is not None:
-        if user.check_password(login_form.password.data): # Password True
-            print('True pass')
+        if user.check_password(login_form.password.data):
             login_user(user, remember=login_form.remember_me.data)
 
-         # if the above check passes, then we know the user has the right credentials
         return redirect(url_for('home_page'))
     return render_template('login.html')
 
