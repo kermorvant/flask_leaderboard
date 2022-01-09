@@ -24,8 +24,8 @@ from scorer import Scorer
 limit_lb = 100 # Number of user showed at leaderboard table
 greater_better = False # True if lowest score is the best; False if greatest score is the best
 metric = mean_absolute_error #change the metric using sklearn function
-scorer = Scorer(public_path = './master_key/public_key.csv', 
-                private_path = './master_key/private_key.csv', 
+scorer = Scorer(public_path = './master_key/public_key.csv',
+                private_path = './master_key/private_key.csv',
                 metric = metric) #change the metric using sklearn function
 
 ## Upload parameter
@@ -128,19 +128,19 @@ def get_leaderboard(greater_better, limit, submission_type = 'public'):
 
     query = f"""
             SELECT
-            user.username, 
+            user.username,
             {score_agg}(submission.score) as score,
             count(submission.id) as total_submission,
             max(timestamp) as last_sub
-            FROM submission 
-            LEFT JOIN user 
+            FROM submission
+            LEFT JOIN user
             ON user.id = submission.user_id
             WHERE submission_type = '{submission_type}'
-            GROUP BY 1 
+            GROUP BY 1
             ORDER BY 2 {score_sorting}, 4
             LIMIT {limit}
             """
-    df = pd.read_sql(query, 
+    df = pd.read_sql(query,
                     db.session.bind)
     return df
 
@@ -150,7 +150,7 @@ def register_page():
     registration_status = request.args.get("registration_status", "")
     reg_form = RegisterForm()
 
-    if request.method == 'POST': 
+    if request.method == 'POST':
         ### REGISTRATION
         if reg_form.validate_on_submit():
             user = User.query.filter_by(username=reg_form.username.data).first()
@@ -170,7 +170,7 @@ def register_page():
             registration_status = "ERROR VALIDATION"
             print("ANEH")
             return redirect(url_for('register_page', registration_status = registration_status))
-        
+
     if request.method == 'GET':
         return render_template('register.html', reg_form = reg_form, registration_status = registration_status)
 
@@ -195,7 +195,7 @@ def home_page():
     leaderboard_private = get_leaderboard(greater_better = greater_better, limit = limit_lb, submission_type='private')
 
     if request.method == 'POST': # If upload file / Login
-        ### LOGIN 
+        ### LOGIN
         if login_form.validate_on_submit():
             print(f'Login requested for user {login_form.username.data}, remember_me={login_form.remember_me.data}')
             user = User.query.filter_by(username=login_form.username.data).first()
@@ -221,7 +221,7 @@ def home_page():
             #throw error if extension is not allowed
             if not allowed_file(submission_file.filename):
                 raise Exception('Invalid file extension')
-            
+
             if submission_file and allowed_file(submission_file.filename):
 
                 filename = secure_filename(submission_file.filename)
@@ -229,7 +229,7 @@ def home_page():
                 target_dir = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.id))
                 if not os.path.exists(target_dir):
                     os.makedirs(target_dir)
-                
+
                 fullPath = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.id) , filename)
                 submission_file.save(fullPath)
 
@@ -244,14 +244,14 @@ def home_page():
                     db.session.commit()
                     print(f"submitted {score}")
 
-                    submission_status =  f"SUBMISSION SUCCESS | Score: {round(score,3)}" 
-                    
+                    submission_status =  f"SUBMISSION SUCCESS | Score: {round(score,3)}"
+
                 return redirect(url_for('home_page', submission_status = submission_status))
-            
-    return render_template('index.html', 
+
+    return render_template('index.html',
                         leaderboard = leaderboard,
                         leaderboard_private = leaderboard_private,
-                        login_form=login_form, 
+                        login_form=login_form,
                         login_status=login_status,
                         submission_status=submission_status
     )
