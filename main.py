@@ -185,6 +185,26 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
+@app.route('/test/')
+def test():
+    return render_template('test.html')
+
+@app.route('/login/', methods=['GET', 'POST'])
+def login():
+    login_form = LoginForm()
+
+    user = User.query.filter_by(username=login_form.username.data).first()
+
+    # check if the user actually exists
+    if user is not None:
+        if user.check_password(login_form.password.data): # Password True
+            print('True pass')
+            login_user(user, remember=login_form.remember_me.data)
+
+         # if the above check passes, then we know the user has the right credentials
+        return redirect(url_for('home_page'))
+    return render_template('login.html')
+
 @app.route('/', methods=['GET', 'POST'])
 def home_page():
     login_form = LoginForm()
