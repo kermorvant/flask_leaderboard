@@ -104,22 +104,12 @@
     <div class=container>
         <h2>Public Leaderboard</h2>
         <table class="table table-hover table-striped">
-            <thead class="thead-dark">
-                <tr>
-                    <th scope="col">No</th>
-                    {% for colName in leaderboard.columns %}
-                    <th scope="col">{{ colName }}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
             <tbody>
-                {% for ix, row in leaderboard.iterrows() %}
+                {% for result in leaderboard %}
                 <tr>
-                    <th scope="row">{{ ix | int + 1 }}</th>
-                    <td>{{ row.username}}</td>
-                    <td>{{ row.score }}</td>
-                    <td>{{ row.total_submission}}</td>
-                    <td>{{ row.last_sub}}</td>
+                    <td>{{ result.user.username}}</td>
+                    <td>{{ result.score }}</td>
+                    <td>{{ result.timestamp}}</td>
                 </tr>
                 {% endfor %}
             </tbody>
