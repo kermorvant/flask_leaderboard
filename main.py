@@ -15,7 +15,7 @@ from flask_admin.model import BaseModelView
 from sklearn.metrics import mean_absolute_error
 
 from forms import LoginForm, RegisterForm
-from config import Config
+import config
 from scorer import Scorer
 
 # PARAMETER
@@ -34,10 +34,13 @@ ALLOWED_EXTENSIONS = {'csv'} # only accept csv files
 
 ## FLASK configuration
 app = Flask(__name__)
+
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 # 2 Megabytes
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = 'my'
-app.config.from_object(Config)
+env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
+print ("using", env_config)
+app.config.from_object(env_config)
 
 ## Database configuration
 db = SQLAlchemy(app)
