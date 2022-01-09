@@ -1,4 +1,4 @@
-import numpy as np 
+import numpy as np
 import pandas as pd
 import os
 import datetime as dt
@@ -126,23 +126,25 @@ def get_leaderboard(greater_better, limit, submission_type = 'public'):
         score_agg = "MIN"
         score_sorting = "ASC"
 
-    query = f"""
-            SELECT
-            user.username,
-            {score_agg}(submission.score) as score,
-            count(submission.id) as total_submission,
-            max(timestamp) as last_sub
-            FROM submission
-            LEFT JOIN user
-            ON user.id = submission.user_id
-            WHERE submission_type = '{submission_type}'
-            GROUP BY 1
-            ORDER BY 2 {score_sorting}, 4
-            LIMIT {limit}
-            """
-    df = pd.read_sql(query,
-                    db.session.bind)
-    return df
+    # query = f"""
+    #         SELECT
+    #         user.username,
+    #         {score_agg}(submission.score) as score,
+    #         count(submission.id) as total_submission,
+    #         max(timestamp) as last_sub
+    #         FROM submission
+    #         LEFT JOIN user
+    #         ON user.id = submission.user_id
+    #         WHERE submission_type = '{submission_type}'
+    #         GROUP BY 1
+    #         ORDER BY 2 {score_sorting}, 4
+    #         LIMIT {limit}
+    #         """
+    # print (query)
+    # df = pd.read_sql(query,
+    #                 db.session.bind)
+    return Submission.query.all()
+
 
 # Route
 @app.route('/register', methods=['GET', 'POST'])
@@ -192,7 +194,6 @@ def home_page():
     submission_status = request.args.get("submission_status", "")
 
     leaderboard = get_leaderboard(greater_better = greater_better, limit = limit_lb, submission_type='public')
-    leaderboard_private = get_leaderboard(greater_better = greater_better, limit = limit_lb, submission_type='private')
 
     if request.method == 'POST': # If upload file / Login
         ### LOGIN
@@ -250,7 +251,6 @@ def home_page():
 
     return render_template('index.html',
                         leaderboard = leaderboard,
-                        leaderboard_private = leaderboard_private,
                         login_form=login_form,
                         login_status=login_status,
                         submission_status=submission_status
